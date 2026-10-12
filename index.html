@@ -6,26 +6,27 @@
     <title>GhostBot | Logs</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --tg-theme-bg-color: #17212b; --tg-theme-text-color: #ffffff; --tg-theme-button-color: #2481cc; --card-bg: #242f3d; }
-        body { background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); font-family: sans-serif; margin: 0; padding: 15px; }
-        .tab { display: none; }
+        :root { --tg-theme-bg-color: #17212b; --tg-theme-text-color: #ffffff; --card-bg: #242f3d; }
+        body { background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; }
+        .tab { display: none; padding-bottom: 60px; }
         .active { display: block; }
-        .card { background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 12px; }
-        .sender { color: #6fb9ef; font-weight: bold; font-size: 0.9em; }
-        .chat { color: #8e8e93; font-size: 0.8em; margin-bottom: 5px; }
-        .text { font-size: 1em; }
-        .nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; background: #0f161e; padding: 10px; box-sizing: border-box; }
-        .nav button { flex: 1; padding: 10px; background: none; border: none; color: #fff; cursor: pointer; }
+        .card { background: var(--card-bg); padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .sender { color: #6fb9ef; font-weight: bold; font-size: 0.95em; }
+        .chat { color: #8e8e93; font-size: 0.8em; margin-bottom: 8px; }
+        .text { font-size: 1.05em; line-height: 1.4; color: #e0e0e0; }
+        .nav { position: fixed; bottom: 0; left: 0; width: 100%; display: flex; background: #0f161e; padding: 10px; box-sizing: border-box; backdrop-filter: blur(10px); }
+        .nav button { flex: 1; padding: 12px; background: none; border: none; color: #fff; cursor: pointer; font-size: 1em; }
+        .nav button:active { opacity: 0.7; }
     </style>
 </head>
 <body>
     <div id="tab-logs" class="tab active">
         <h2 style="text-align: center;">🗑 Лог удалений</h2>
-        <div id="logs-container"></div>
+        <div id="logs-container">Загрузка данных...</div>
     </div>
     <div id="tab-settings" class="tab">
         <h2 style="text-align: center;">⚙️ Настройки</h2>
-        <div class="card">Управление ботом через кнопки в чате. Сюда можно добавить еще настроек.</div>
+        <div class="card">Управляй отслеживанием через бота в Telegram.</div>
     </div>
     <div class="nav">
         <button onclick="switchTab('logs')">🗑 Логи</button>
@@ -36,17 +37,26 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-' + tab).classList.add('active');
         }
-        // Здесь мы будем подгружать данные из log_data.json
-        fetch('log_data.json').then(r => r.json()).then(data => {
-            const container = document.getElementById('logs-container');
-            data.forEach(log => {
-                container.innerHTML += `<div class="card">
-                    <div class="chat">В чате: ${log.chat}</div>
-                    <div class="sender">${log.sender}</div>
-                    <div class="text">${log.text}</div>
-                </div>`;
-            });
-        });
+
+        async function loadLogs() {
+            try {
+                const response = await fetch('log_data.json?t=' + new Date().getTime());
+                if (!response.ok) throw new Error('Данные еще не созданы');
+                const data = await response.json();
+                const container = document.getElementById('logs-container');
+                container.innerHTML = '';
+                data.forEach(log => {
+                    container.innerHTML += `<div class="card">
+                        <div class="chat">В чате: ${log.chat}</div>
+                        <div class="sender">${log.sender}</div>
+                        <div class="text">${log.text}</div>
+                    </div>`;
+                });
+            } catch(e) {
+                document.getElementById('logs-container').innerHTML = '<div class="card">Удаленных сообщений пока нет.</div>';
+            }
+        }
+        loadLogs();
     </script>
 </body>
 </html>
