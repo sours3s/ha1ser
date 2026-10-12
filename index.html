@@ -6,27 +6,31 @@
     <title>GhostBot</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #17212b; --card: #242f3d; --text: #ffffff; --accent: #6fb9ef; }
+        :root { --bg: #0f161e; --card: #1c252f; --text: #ffffff; --accent: #2481cc; }
         body { background-color: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 15px; }
-        .card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; }
-        .log-chat { color: var(--accent); font-size: 0.8em; }
-        .btn { background: var(--accent); color: white; border: none; padding: 8px 12px; border-radius: 8px; margin-top: 5px; }
+        .card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; }
+        .chat-info { color: #8e8e93; font-size: 0.8em; margin-bottom: 5px; }
+        .sender { color: var(--accent); font-weight: bold; }
+        .btn { display: inline-block; background: var(--accent); color: white; border: none; padding: 8px 12px; border-radius: 8px; margin-top: 8px; text-decoration: none; font-size: 0.9em; }
     </style>
 </head>
 <body>
-    <h2>🗑 Логи удалений</h2>
-    <div id="logs">Загрузка...</div>
+    <h2 style="text-align: center;">🗑 Просмотр удаленных</h2>
+    <div id="logs-container">⏳ Загрузка логов...</div>
     <script>
-        fetch('data.json').then(r => r.json()).then(data => {
-            document.getElementById('logs').innerHTML = data.logs.map(log => \`
-                <div class="card">
-                    <div class="log-chat">\${log.chat_title}</div>
-                    <strong>\${log.sender}</strong>: \${log.text}
-                    <br><button class="btn" onclick="openChat(\${log.chat_id})">Перейти к чату</button>
-                </div>
-            \`).join('');
-        });
-        function openChat(cid) { window.Telegram.WebApp.openTelegramLink('https://t.me/c/' + cid); }
+        fetch('data.json?t=' + Date.now())
+           .then(r => r.json())
+           .then(data => {
+               const cont = document.getElementById('logs-container');
+               cont.innerHTML = data.map(log => \`
+                   <div class="card">
+                       <div class="chat-info">В чате: \${log.chat_title}</div>
+                       <div class="sender">\${log.sender}</div>
+                       <div>\${log.text}</div>
+                       <a class="btn" href="https://t.me/c/\${log.chat_id.toString().replace('-100', '')}/\${log.msg_id}">Перейти к чату</a>
+                   </div>
+               \`).join('');
+           }).catch(() => document.getElementById('logs-container').innerHTML = "Нет данных");
     </script>
 </body>
 </html>
