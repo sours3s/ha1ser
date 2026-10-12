@@ -2,60 +2,1193 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GhostBot | App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GhostBot | Control Panel</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #17212b; --card: #242f3d; --text: #ffffff; --accent: #6fb9ef; --tab-bg: #0f161e; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding-bottom: 70px; }
-        header { background: var(--tab-bg); padding: 15px; text-align: center; font-weight: bold; position: sticky; top: 0; }
-        .tab-content { padding: 15px; display: none; }
-        .tab-content.active { display: block; }
-        .card { background: var(--card); padding: 16px; border-radius: 12px; margin-bottom: 12px; }
-        .chat-info { color: #8e8e93; font-size: 0.75em; margin-bottom: 4px; }
-        .sender { color: var(--accent); font-weight: 600; }
-        .text { font-size: 1em; margin: 6px 0; }
-        .btn-chat { display: block; background: var(--accent); color: white; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-size: 0.9em; font-weight: 600; }
-        .nav { position: fixed; bottom: 0; width: 100%; display: flex; background: var(--tab-bg); border-top: 1px solid #333; }
-        .nav button { flex: 1; border: none; background: none; color: #8e8e93; padding: 15px; }
-        .nav button.active { color: var(--accent); }
+        :root {
+            --bg-color: #0f1621;
+            --secondary-bg: #17212b;
+            --card-bg: #242f3d;
+            --card-border: rgba(255, 255, 255, 0.06);
+            --text-color: #ffffff;
+            --subtext-color: #8e8e93;
+            --accent-color: #6fb9ef;
+            --accent-hover: #52a5e0;
+            --danger-color: #e53935;
+            --success-color: #4caf50;
+            --warning-color: #ffa726;
+            --tab-active: #6fb9ef;
+            --tab-inactive: #708499;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 85px;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        header {
+            background: var(--secondary-bg);
+            border-bottom: 1px solid var(--card-border);
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title .logo {
+            font-size: 24px;
+        }
+
+        .header-title h1 {
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--success-color);
+            background: rgba(76, 175, 80, 0.15);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            box-shadow: 0 0 8px var(--success-color);
+        }
+
+        /* TABS CONTENT */
+        .tab-content {
+            display: none;
+            padding: 16px;
+            max-width: 650px;
+            margin: 0 auto;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* SEARCH & FILTER BAR */
+        .search-box {
+            position: relative;
+            margin-bottom: 14px;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: var(--secondary-bg);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px 12px 40px;
+            border-radius: 12px;
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            fill: var(--subtext-color);
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+            scrollbar-width: none;
+        }
+
+        .filter-chips::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chip {
+            background: var(--secondary-bg);
+            border: 1px solid var(--card-border);
+            color: var(--subtext-color);
+            padding: 7px 14px;
+            border-radius: 18px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip.active {
+            background: var(--accent-color);
+            color: #ffffff;
+            border-color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        /* LOG CARDS */
+        .log-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            transition: transform 0.15s;
+        }
+
+        .log-card:active {
+            transform: scale(0.995);
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .sender-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6fb9ef, #2b5278);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .sender-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sender-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chat-name {
+            font-size: 12px;
+            color: var(--subtext-color);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 1px;
+        }
+
+        .badge-tag {
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-private {
+            background: rgba(111, 185, 239, 0.18);
+            color: var(--accent-color);
+        }
+
+        .badge-group {
+            background: rgba(255, 167, 38, 0.18);
+            color: var(--warning-color);
+        }
+
+        .badge-viewonce {
+            background: rgba(229, 57, 53, 0.2);
+            color: #ff5252;
+            border: 1px solid rgba(229, 57, 53, 0.4);
+        }
+
+        .log-time {
+            font-size: 11px;
+            color: var(--subtext-color);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .log-body {
+            background: rgba(15, 22, 33, 0.6);
+            border-left: 3px solid var(--accent-color);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            line-height: 1.45;
+            color: #e6e6e6;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .log-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 9px 12px;
+            border-radius: 9px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-chat {
+            background: var(--accent-color);
+            color: #ffffff;
+        }
+
+        .btn-chat:hover, .btn-chat:active {
+            background: var(--accent-hover);
+        }
+
+        .btn-copy {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-color);
+            flex: 0 0 42px;
+        }
+
+        .btn-copy:active {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--subtext-color);
+        }
+
+        .empty-icon {
+            font-size: 52px;
+            margin-bottom: 14px;
+            opacity: 0.8;
+        }
+
+        .empty-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .empty-desc {
+            font-size: 13px;
+            line-height: 1.4;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        /* SETTINGS SECTION */
+        .settings-group {
+            margin-bottom: 22px;
+        }
+
+        .group-title {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            padding-left: 4px;
+        }
+
+        .settings-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding-right: 14px;
+        }
+
+        .setting-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .setting-desc {
+            font-size: 12px;
+            color: var(--subtext-color);
+            line-height: 1.35;
+        }
+
+        /* TOGGLE SWITCH */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 30px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #394759;
+            transition: .25s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .25s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* PRIMARY BUTTON */
+        .btn-primary {
+            width: 100%;
+            background: var(--accent-color);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(111, 185, 239, 0.35);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            background: var(--accent-hover);
+        }
+
+        /* CHATS LIST (SELECTIVE TRACKING) */
+        .chat-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .chat-row:last-child {
+            border-bottom: none;
+        }
+
+        .chat-row-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #2b5278;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid var(--card-border);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 4px;
+        }
+
+        .stat-title {
+            font-size: 12px;
+            color: var(--subtext-color);
+            font-weight: 500;
+        }
+
+        /* BOTTOM NAVIGATION */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 64px;
+            background: var(--secondary-bg);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--tab-inactive);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            flex: 1;
+            height: 100%;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .nav-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+            transition: transform 0.2s;
+        }
+
+        .nav-btn.active {
+            color: var(--tab-active);
+            font-weight: 600;
+        }
+
+        .nav-btn.active svg {
+            transform: translateY(-2px);
+        }
+
+        .badge-count {
+            position: absolute;
+            top: 8px;
+            right: 24%;
+            background: var(--danger-color);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 10px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(36, 47, 61, 0.95);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(8px);
+        }
+
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
     </style>
 </head>
 <body>
-    <header>🗑 GhostBot Logs</header>
 
-    <div id="logs-tab" class="tab-content active">
-        <div id="logs-list">Загрузка...</div>
-    </div>
-    <div id="settings-tab" class="tab-content">
-        <h2>⚙️ Настройки</h2>
-        <div class="card">Управление ботом через команды /menu.</div>
+    <!-- HEADER -->
+    <header>
+        <div class="header-title">
+            <span class="logo">👻</span>
+            <div>
+                <h1>GhostBot</h1>
+            </div>
+        </div>
+        <div class="header-status" id="header-status">
+            <span class="status-dot"></span>
+            <span>Онлайн</span>
+        </div>
+    </header>
+
+    <!-- TAB 1: ЛОГИ УДАЛЕНИЙ -->
+    <div id="tab-logs" class="tab-content active">
+        <div class="search-box">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="log-search" placeholder="Поиск по отправителю, чату или тексту..." oninput="filterLogs()">
+        </div>
+
+        <div class="filter-chips">
+            <button class="chip active" onclick="setFilter('all', this)">Все</button>
+            <button class="chip" onclick="setFilter('private', this)">👤 Лички</button>
+            <button class="chip" onclick="setFilter('group', this)">👥 Группы</button>
+            <button class="chip" onclick="setFilter('view_once', this)">🔥 Одноразовые</button>
+        </div>
+
+        <div id="logs-container">
+            <!-- Сюда динамически загружаются логи -->
+            <div class="empty-state">
+                <div class="empty-icon">⏳</div>
+                <div class="empty-title">Загрузка логов...</div>
+                <div class="empty-desc">Синхронизация с базой данных GhostBot</div>
+            </div>
+        </div>
     </div>
 
-    <nav class="nav">
-        <button id="btn-logs" class="active" onclick="showTab('logs')">🗑 Логи</button>
-        <button id="btn-settings" onclick="showTab('settings')">⚙️ Настройки</button>
+    <!-- TAB 2: НАСТРОЙКИ -->
+    <div id="tab-settings" class="tab-content">
+        <div class="settings-group">
+            <div class="group-title">Общие настройки отслеживания</div>
+            <div class="settings-card">
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-name">👤 Отслеживать личные чаты</div>
+                        <div class="setting-desc">Фиксировать удаленные сообщения во всех диалогах</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="set-track-priv" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-name">👥 Отслеживать все группы</div>
+                        <div class="setting-desc">Следить за групповыми чатами и беседами</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="set-track-groups">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-name">📢 Отслеживать каналы</div>
+                        <div class="setting-desc">Фиксировать удаление постов в каналах</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="set-track-channels">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <div class="group-title">Медиа и безопасность</div>
+            <div class="settings-card">
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-name">🔥 Перехват одноразовых фото/видео</div>
+                        <div class="setting-desc">Моментально сохранять сгорающие медиа и отправлять в ЛС</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="set-track-view-once" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-name">🔔 Уведомления в Telegram</div>
+                        <div class="setting-desc">Присылать уведомление в личку бота при каждом удалении</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="set-notify-delete" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="saveSettings()">
+            <span>💾 Сохранить и применить настройки</span>
+        </button>
+    </div>
+
+    <!-- TAB 3: ВЫБОРОЧНЫЕ ЧАТЫ -->
+    <div id="tab-chats" class="tab-content">
+        <div class="settings-group">
+            <div class="group-title">Выборочные чаты для слежки</div>
+            <p style="font-size: 13px; color: var(--subtext-color); margin-bottom: 12px; padding-left: 4px;">
+                Включите индивидуальное отслеживание для нужных пользователей или бесед:
+            </p>
+            <div class="settings-card" id="chats-list-container">
+                <div class="empty-state">
+                    <div class="empty-icon">💬</div>
+                    <div class="empty-title">Чаты подгружаются</div>
+                    <div class="empty-desc">Список активных диалогов появится здесь автоматически при получении сообщений.</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="saveChatsWhitelist()">
+            <span>💾 Применить выбор чатов</span>
+        </button>
+    </div>
+
+    <!-- TAB 4: СТАТИСТИКА -->
+    <div id="tab-stats" class="tab-content">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-deleted">0</div>
+                <div class="stat-title">Удалено сообщений</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-messages">0</div>
+                <div class="stat-title">Сообщений в базе</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-viewonce">0</div>
+                <div class="stat-title">Одноразовых медиа</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-chats">0</div>
+                <div class="stat-title">Активных чатов</div>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <div class="group-title">Информация о GhostBot</div>
+            <div class="settings-card">
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-name">Статус системы</div>
+                        <div class="setting-desc">Подключен через Telegram Business</div>
+                    </div>
+                    <span style="color: var(--success-color); font-weight: 600; font-size: 14px;">АКТИВЕН</span>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-name">Версия панели</div>
+                        <div class="setting-desc">v2.5 Pro (Direct Sync)</div>
+                    </div>
+                    <span style="color: var(--accent-color); font-weight: 600; font-size: 14px;">2026.10</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="fetchData(true)">
+            <span>🔄 Принудительно обновить данные</span>
+        </button>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="nav-bar">
+        <button class="nav-btn active" id="nav-logs" onclick="switchTab('logs')">
+            <svg viewBox="0 0 24 24"><path d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12z"/></svg>
+            <span>Логи</span>
+            <span class="badge-count" id="badge-logs-count" style="display: none;">0</span>
+        </button>
+        <button class="nav-btn" id="nav-settings" onclick="switchTab('settings')">
+            <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.485.485 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            <span>Настройки</span>
+        </button>
+        <button class="nav-btn" id="nav-chats" onclick="switchTab('chats')">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+            <span>Чаты</span>
+        </button>
+        <button class="nav-btn" id="nav-stats" onclick="switchTab('stats')">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+            <span>Статы</span>
+        </button>
     </nav>
 
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">
+        <span id="toast-icon">✓</span>
+        <span id="toast-text">Настройки успешно сохранены</span>
+    </div>
+
     <script>
-        function showTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
-            document.querySelectorAll('.nav button').forEach(e => e.classList.remove('active'));
-            document.getElementById(tab + '-tab').classList.add('active');
-            document.getElementById('btn-' + tab).classList.add('active');
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            try {
+                tg.setHeaderColor('#17212b');
+                tg.setBackgroundColor('#0f1621');
+                tg.enableClosingConfirmation();
+            } catch(e) {}
         }
 
-        fetch('data.json?t='+Date.now()).then(r => r.json()).then(data => {
-            const list = document.getElementById('logs-list');
-            list.innerHTML = data.logs.map(log => `
-                <div class="card">
-                    <div class="chat-info">Чат: ${log.chat_title}</div>
-                    <div class="sender">${log.sender}</div>
-                    <div class="text">${log.text}</div>
-                    <a class="btn-chat" href="https://t.me/c/${log.chat_id.toString().replace('-100', '')}/${log.msg_id}">Перейти к сообщению</a>
+        let appData = {
+            deleted_logs: [],
+            settings: {
+                track_priv: "1",
+                track_groups: "0",
+                track_channels: "0",
+                track_view_once: "1",
+                notify_on_delete: "1"
+            },
+            chats: [],
+            stats: {
+                total_deleted: 0,
+                total_messages: 0,
+                total_view_once: 0,
+                total_chats: 0
+            }
+        };
+
+        let currentFilter = 'all';
+
+        function haptic(type = 'light') {
+            if (tg?.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred(type);
+            }
+        }
+
+        function showToast(text, icon = '✓') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-icon').textContent = icon;
+            document.getElementById('toast-text').textContent = text;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        function switchTab(tabId) {
+            haptic('light');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.getElementById('nav-' + tabId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setFilter(filter, btn) {
+            haptic('selection');
+            currentFilter = filter;
+            document.querySelectorAll('.filter-chips .chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            renderLogs();
+        }
+
+        function formatTime(unixSec) {
+            if (!unixSec) return '';
+            const d = new Date(unixSec * 1000);
+            return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' ' +
+                   d.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+        }
+
+        function renderLogs() {
+            const container = document.getElementById('logs-container');
+            const searchVal = document.getElementById('log-search').value.toLowerCase().trim();
+
+            let logs = appData.deleted_logs || [];
+
+            // Фильтрация
+            if (currentFilter === 'private') {
+                logs = logs.filter(l => l.chat_type === 'private');
+            } else if (currentFilter === 'group') {
+                logs = logs.filter(l => l.chat_type === 'group' || l.chat_type === 'supergroup');
+            } else if (currentFilter === 'view_once') {
+                logs = logs.filter(l => l.is_view_once == 1);
+            }
+
+            if (searchVal) {
+                logs = logs.filter(l =>
+                    (l.sender_name && l.sender_name.toLowerCase().includes(searchVal)) ||
+                    (l.sender_username && l.sender_username.toLowerCase().includes(searchVal)) ||
+                    (l.chat_title && l.chat_title.toLowerCase().includes(searchVal)) ||
+                    (l.text && l.text.toLowerCase().includes(searchVal))
+                );
+            }
+
+            const badge = document.getElementById('badge-logs-count');
+            if (logs.length > 0) {
+                badge.textContent = logs.length;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            if (logs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🗑</div>
+                        <div class="empty-title">Удаленных сообщений нет</div>
+                        <div class="empty-desc">Бот активен и фиксирует события в подключенных чатах. Как только кто-то удалит сообщение — оно сразу появится здесь.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = logs.map(log => {
+                const initial = (log.sender_name || log.sender_username || '?').charAt(0).toUpperCase();
+                const isPrivate = log.chat_type === 'private';
+                const chatBadgeClass = isPrivate ? 'badge-private' : 'badge-group';
+                const chatBadgeText = isPrivate ? 'Личка' : 'Группа';
+                const viewOnceBadge = log.is_view_once ? `<span class="badge-tag badge-viewonce">🔥 Одноразовое</span>` : '';
+
+                // Генерация ссылки на чат
+                let chatUrl = '#';
+                let hasChatUrl = false;
+                const cid = log.chat_id ? String(log.chat_id) : '';
+
+                if (log.sender_username) {
+                    chatUrl = `https://t.me/${log.sender_username}`;
+                    hasChatUrl = true;
+                } else if (cid.startsWith('-100')) {
+                    const cleanCid = cid.replace('-100', '');
+                    chatUrl = `https://t.me/c/${cleanCid}/${log.msg_id || 1}`;
+                    hasChatUrl = true;
+                } else if (isPrivate && log.sender_id) {
+                    chatUrl = `tg://user?id=${log.sender_id}`;
+                    hasChatUrl = true;
+                }
+
+                const safeText = (log.text || '[Без текста]').replace(/"/g, '&quot;');
+
+                return `
+                    <div class="log-card">
+                        <div class="log-header">
+                            <div class="sender-wrapper">
+                                <div class="avatar">${initial}</div>
+                                <div class="sender-info">
+                                    <div class="sender-name">
+                                        ${log.sender_name || 'Неизвестный'}
+                                        ${log.sender_username ? `<span style="font-size:12px; font-weight:normal; color:#8e8e93;">@${log.sender_username}</span>` : ''}
+                                    </div>
+                                    <div class="chat-name">
+                                        <span class="badge-tag ${chatBadgeClass}">${chatBadgeText}</span>
+                                        ${viewOnceBadge}
+                                        <span>• ${log.chat_title || 'Диалог'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="log-time">
+                                🗑 ${formatTime(log.del_time || log.msg_time)}
+                            </div>
+                        </div>
+
+                        <div class="log-body">${escapeHtml(log.text || '[Медиа/Файл]')}</div>
+
+                        <div class="log-actions">
+                            ${hasChatUrl ? `
+                                <a class="btn-action btn-chat" href="${chatUrl}" target="_blank" onclick="openChatLink('${chatUrl}', event)">
+                                    <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+                                    Перейти к чату
+                                </a>
+                            ` : `
+                                <button class="btn-action btn-chat" style="opacity: 0.6; cursor: default;">
+                                    💬 Чат #${cid.replace('-100', '')}
+                                </button>
+                            `}
+                            <button class="btn-action btn-copy" title="Копировать текст" onclick="copyText('${safeText}')">
+                                <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function filterLogs() {
+            renderLogs();
+        }
+
+        function openChatLink(url, event) {
+            event.preventDefault();
+            haptic('medium');
+            if (tg && tg.openTelegramLink && url.includes('t.me/')) {
+                tg.openTelegramLink(url);
+            } else if (tg && tg.openLink) {
+                tg.openLink(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+
+        function copyText(text) {
+            haptic('light');
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Текст скопирован!", "📋");
+            }).catch(() => {
+                showToast("Ошибка копирования", "❌");
+            });
+        }
+
+        function renderSettings() {
+            const s = appData.settings || {};
+            document.getElementById('set-track-priv').checked = s.track_priv == "1";
+            document.getElementById('set-track-groups').checked = s.track_groups == "1";
+            document.getElementById('set-track-channels').checked = s.track_channels == "1";
+            document.getElementById('set-track-view-once').checked = s.track_view_once == "1";
+            document.getElementById('set-notify-delete').checked = s.notify_on_delete == "1";
+        }
+
+        function renderChats() {
+            const container = document.getElementById('chats-list-container');
+            const chats = appData.chats || [];
+
+            if (chats.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">💬</div>
+                        <div class="empty-title">Чатов пока нет</div>
+                        <div class="empty-desc">Список автоматически формируется по мере входящих сообщений от собеседников.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = chats.map(c => `
+                <div class="chat-row">
+                    <div class="chat-row-left">
+                        <div class="chat-avatar">${(c.title || c.username || '?').charAt(0).toUpperCase()}</div>
+                        <div>
+                            <div style="font-size:15px; font-weight:600; color:#fff;">${c.title || 'Пользователь'}</div>
+                            <div style="font-size:12px; color:var(--subtext-color);">
+                                ${c.username ? '@' + c.username : (c.chat_type === 'private' ? 'Личка' : 'Группа')}
+                            </div>
+                        </div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" class="chat-toggle" data-chat-id="${c.chat_id}" ${c.is_tracked != 0 ? 'checked' : ''}>
+                        <span class="slider"></span>
+                    </label>
                 </div>
             `).join('');
-        }).catch(() => document.getElementById('logs-list').innerHTML = "Данных пока нет.");
+        }
+
+        function renderStats() {
+            const stats = appData.stats || {};
+            document.getElementById('stat-deleted').textContent = stats.total_deleted || (appData.deleted_logs ? appData.deleted_logs.length : 0);
+            document.getElementById('stat-messages').textContent = stats.total_messages || 0;
+            document.getElementById('stat-viewonce').textContent = stats.total_view_once || 0;
+            document.getElementById('stat-chats').textContent = stats.total_chats || (appData.chats ? appData.chats.length : 0);
+        }
+
+        function saveSettings() {
+            haptic('heavy');
+            const newSettings = {
+                track_priv: document.getElementById('set-track-priv').checked ? "1" : "0",
+                track_groups: document.getElementById('set-track-groups').checked ? "1" : "0",
+                track_channels: document.getElementById('set-track-channels').checked ? "1" : "0",
+                track_view_once: document.getElementById('set-track-view-once').checked ? "1" : "0",
+                notify_on_delete: document.getElementById('set-notify-delete').checked ? "1" : "0"
+            };
+
+            appData.settings = newSettings;
+
+            const payload = {
+                action: "save_settings",
+                settings: newSettings
+            };
+
+            sendDataToBot(payload);
+        }
+
+        function saveChatsWhitelist() {
+            haptic('heavy');
+            const toggles = document.querySelectorAll('.chat-toggle');
+            const chatTracking = {};
+            toggles.forEach(t => {
+                chatTracking[t.getAttribute('data-chat-id')] = t.checked ? 1 : 0;
+            });
+
+            const payload = {
+                action: "save_chats",
+                chats: chatTracking
+            };
+
+            sendDataToBot(payload);
+        }
+
+        function sendDataToBot(payload) {
+            const jsonStr = JSON.stringify(payload);
+
+            // Метод 1: Через нативный Telegram WebApp sendData (работает при открытии с клавиатуры)
+            let sentViaWebAppData = false;
+            try {
+                if (tg && tg.sendData) {
+                    tg.sendData(jsonStr);
+                    sentViaWebAppData = true;
+                }
+            } catch(e) {}
+
+            // Метод 2: Fallback через Telegram Deep Link к боту
+            const b64 = btoa(encodeURIComponent(jsonStr));
+            const botDeepLink = `https://t.me/Ha1ser_bot?start=cfg_${b64}`;
+
+            showToast("Настройки сохраняются в боте...", "💾");
+
+            setTimeout(() => {
+                if (!sentViaWebAppData && tg && tg.openTelegramLink) {
+                    tg.openTelegramLink(botDeepLink);
+                }
+                showToast("Настройки успешно применены!", "✓");
+            }, 500);
+        }
+
+        function fetchData(manual = false) {
+            if (manual) haptic('medium');
+            fetch('data.json?t=' + Date.now(), { cache: "no-store" })
+                .then(r => {
+                    if (!r.ok) throw new Error("HTTP error " + r.status);
+                    return r.json();
+                })
+                .then(data => {
+                    appData = data;
+                    renderLogs();
+                    renderSettings();
+                    renderChats();
+                    renderStats();
+                    if (manual) showToast("Данные обновлены!", "🔄");
+                })
+                .catch(err => {
+                    console.log("Fetch error:", err);
+                    if (manual) showToast("Данные актуальны", "✓");
+                });
+        }
+
+        // Автозагрузка данных каждые 5 секунд для мгновенного отображения новых удалений
+        fetchData();
+        setInterval(() => fetchData(false), 5000);
     </script>
 </body>
 </html>

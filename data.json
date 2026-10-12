@@ -1,0 +1,17 @@
+{
+  "deleted_logs": [],
+  "settings": {
+    "track_priv": "1",
+    "track_groups": "0",
+    "track_channels": "0",
+    "track_view_once": "1",
+    "notify_on_delete": "1"
+  },
+  "chats": [],
+  "stats": {
+    "total_deleted": 0,
+    "total_messages": 0,
+    "total_view_once": 0,
+    "total_chats": 0
+  }
+}
