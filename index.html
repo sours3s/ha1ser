@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GhostBot | Logs</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --tg-theme-bg-color: #17212b; --tg-theme-text-color: #ffffff; --card-bg: #242f3d; }
+        body { background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; }
+        .card { background: var(--card-bg); padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .sender { color: #6fb9ef; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center;">🗑 Лог удалений</h2>
+    <div id="logs-container">⏳ Загрузка из Bot API...</div>
+    <script>
+        fetch('data.json?t=' + Date.now())
+           .then(r => r.json())
+           .then(data => {
+               const cont = document.getElementById('logs-container');
+               cont.innerHTML = data.map(log => `
+                   <div class="card">
+                       <div style="font-size: 0.8em; color: #8e8e93;">Чат: ${log.chat_title}</div>
+                       <div class="sender">${log.sender}</div>
+                       <div style="margin: 10px 0;">${log.text}</div>
+                       <a style="color: #6fb9ef; text-decoration: none;" href="https://t.me/c/${log.chat_id.toString().replace('-100', '')}/${log.msg_id}">🔗 Перейти к сообщению</a>
+                   </div>
+               `).join('');
+           }).catch(() => document.getElementById('logs-container').innerHTML = "Нет данных");
+    </script>
+</body>
+</html>
