@@ -3,17 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GhostBot Logs</title>
+    <title>GhostBot</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background-color: #17212b; color: white; font-family: sans-serif; margin: 0; padding: 15px; }
-        .log-card { background: #242f3d; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
-        .log-header { font-size: 0.8em; color: #6fb9ef; }
-        .sender { font-weight: bold; }
+        :root { --tg-theme-bg-color: #17212b; --tg-theme-text-color: #ffffff; --tg-theme-button-color: #2481cc; }
+        body { background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); font-family: sans-serif; margin: 0; padding: 0; }
+        header { padding: 15px; text-align: center; font-size: 1.2em; font-weight: bold; }
+        .tab-content { padding: 15px; }
+        .card { background: #242f3d; padding: 15px; border-radius: 15px; margin-bottom: 10px; }
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #17212b; border-top: 1px solid #333; }
+        .nav button { flex: 1; padding: 15px; background: none; border: none; color: white; }
     </style>
 </head>
 <body>
-    <h2 style="text-align: center;">🗑 Лог удалений</h2>
-    <div id="logs-container">Данные загружаются...</div>
+    <header>🗑 GhostBot App</header>
+    <div id="logs" class="tab-content">
+        <div class="card"><div style='font-size:0.8em; color:#6fb9ef'>Личка (Иван)</div><div>Привет!</div></div>
+        <div class="card"><div style='font-size:0.8em; color:#6fb9ef'>Группа (Мемы)</div><div>Ты видел это?</div></div>
+    </div>
+    <div class="nav">
+        <button onclick="showTab('logs')">🗑 Логи</button>
+        <button onclick="showTab('settings')">⚙️ Настройки</button>
+    </div>
+    <script>
+        function showTab(tab) {
+            document.getElementById('logs').innerHTML = tab === 'logs' ? '<h3>🗑 Логи</h3>...' : '<h3>⚙️ Настройки</h3>...';
+        }
+    </script>
 </body>
 </html>
